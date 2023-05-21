@@ -119,3 +119,18 @@ select *, (PercentageVaccinated/Population) * 100 from #TmpPopulationVaccinated 
 
 select Continent, Location,	Population from #TmpPopulationVaccinated order by location
 --order by continent
+
+--Creating views
+Create view vwPopulationVaccinated as
+select 
+	deaths.continent, 
+	deaths.location, 
+	deaths.date, 
+	deaths.population, 
+	vacs.new_vaccinations, 
+	sum(cast(new_vaccinations as int)) over (partition by deaths.location order by deaths.location, deaths.date) as PercentageVaccinated
+from CovidDeaths deaths
+join CovidVaccinations vacs
+	on deaths.location = vacs.location
+	and deaths.date = vacs.date	
+where deaths.continent is not null
